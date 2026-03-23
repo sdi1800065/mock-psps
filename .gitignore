@@ -1,0 +1,10 @@
+/vendor/
+composer.lock
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+.github/
