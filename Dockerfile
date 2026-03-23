@@ -9,10 +9,12 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.
 
 RUN sed -ri -e 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 
-# Trust corporate CA certificates (required behind SSL-inspecting proxies)
-RUN apt-get update && apt-get install -y ca-certificates curl unzip git && rm -rf /var/lib/apt/lists/*
-COPY windows-ca-bundle.pem /usr/local/share/ca-certificates/windows-ca-bundle.crt
-RUN update-ca-certificates
+RUN apt-get update && apt-get install -y libpq-dev libzip-dev curl zip unzip git && rm -rf /var/lib/apt/lists/*
+
+# Trust corporate CA certificates (if needed)
+# RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+# COPY windows-ca-bundle.pem /usr/local/share/ca-certificates/windows-ca-bundle.crt
+# RUN update-ca-certificates
 
 RUN docker-php-ext-install pdo pdo_mysql
 

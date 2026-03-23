@@ -28,7 +28,7 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-usecret"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-umockpsps", "-psecret"]
       interval: 5s
       timeout: 5s
       retries: 10
