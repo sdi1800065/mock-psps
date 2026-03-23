@@ -1,6 +1,7 @@
 /vendor/
 composer.lock
 .env
+windows-ca-bundle.pem
 
 # IDE
 .idea/
