@@ -1,5 +1,5 @@
 {
-    "name": "everypay/payment-service",
+    "name": "mock-psps/payment-service",
     "description": "A PHP backen connecting mccs with psps",
     "type": "project",
     "require": {
@@ -10,12 +10,12 @@
     },
     "autoload": {
         "psr-4": {
-            "EveryPay\\": "src/"
+            "mock-psps\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "EveryPay\\Tests\\": "tests/"
+            "mock-psps\\Tests\\": "tests/"
         }
     }
 }
