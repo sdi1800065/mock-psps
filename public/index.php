@@ -5,7 +5,7 @@ declare(strict_types=1); // Throw errors on type mismatches
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use MockPsps\Repository\InMemoryMerchantRepository;
-use MockPsps\Repository\InMemoryChargeRepository;
+use MockPsps\Repository\MySqlChargeRepository;
 use MockPsps\Psp\FakeStripe;
 use MockPsps\Psp\FakePaypal;
 use MockPsps\Service\ChargeService;
@@ -14,7 +14,13 @@ header('Content-Type: application/json');
 
 $merchants = require __DIR__ . '/../config/merchants.php';
 $merchantRepository = new InMemoryMerchantRepository($merchants);
-$chargeRepository  = new InMemoryChargeRepository();
+$pdo = new \PDO(
+    'mysql:host=' . getenv('DB_HOST') . ';dbname=' . getenv('DB_NAME') . ';charset=utf8mb4',
+    getenv('DB_USER'),
+    getenv('DB_PASS'),
+    [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+);
+$chargeRepository = new MySqlChargeRepository($pdo);
 $chargeService = new ChargeService($chargeRepository, [
     'fakeStripe' => new FakeStripe(),
     'fakePaypal' => new FakePaypal(),

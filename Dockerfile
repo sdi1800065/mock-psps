@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y ca-certificates curl unzip git && rm -r
 COPY windows-ca-bundle.pem /usr/local/share/ca-certificates/windows-ca-bundle.crt
 RUN update-ca-certificates
 
+RUN docker-php-ext-install pdo pdo_mysql
+
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 COPY . /var/www/html/
