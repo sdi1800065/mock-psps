@@ -1,5 +1,8 @@
 RewriteEngine On
 
+# Pass Authorization header to PHP (Apache strips it by default)
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
 # If the requested file or directory exists, serve it directly
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

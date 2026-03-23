@@ -17,7 +17,14 @@ class ChargeService {
 
     public function charge(Merchant $merchant, array $params): Charge
     {
-        $merchantPsp = $this->psps[$merchant->pspName->value] ?? null ;
+        if (!isset($params['amount']) || !is_int($params['amount']) || $params['amount'] <= 0) {
+            throw new \InvalidArgumentException('amount must be a positive integer (cents)');
+        }
+        if (empty($params['currency']) || !is_string($params['currency'])) {
+            throw new \InvalidArgumentException('currency is required');
+        }
+
+        $merchantPsp = $this->psps[$merchant->pspName->value] ?? null;
         if(empty($merchantPsp)) throw new \RuntimeException("PSP not configured");
         $chargeResult = $merchantPsp->charge($params);
         $charge = new Charge(
