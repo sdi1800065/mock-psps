@@ -1,0 +1,40 @@
+One of our core responsibilities is building and maintaining services that interact with payment providers and expose
+functionality via APIs.
+The Task
+Build a PHP-based service that allows merchants to charge payment cards through external payment service
+providers (PSPs). The system must support two fake PSP implementations:
+• fakeStripe (input parameters: amount, credit card number, CVV, expiry month, expiry year)
+• fakePaypal (input parameters: amount, email, password)
+These PSPs are mock implementations. No real payment processing is required and no external APIs should
+be called. The implementation can simply simulate a successful or failed charge.
+Each merchant is configured to use one PSP at a time, and all requests to the service must be authenticated.
+In addition to charging payments, the system should provide a way to collect payment charges for a merchant
+over a given time period and send them to the merchant via email. For context, merchants typically request
+reports for periods such as "last 7 days" or "last 30 days".
+Functional Expectations
+At a high level, your solution should:
+• Expose an API endpoint that allows charging a payment card
+• Authenticate all incoming API requests
+• Support multiple merchants, each with their own PSP configuration
+• Persist and retrieve charge data
+• Provide a command-line mechanism that collects charges for a specific merchant within a time-frame and
+sends the result to the merchant via email
+The exact API design, data model, storage choice, and email delivery mechanism are left to you.
+Technical Constraints
+• The application must be dockerized
+• Use PHP 8.2 or newer
+• Dependencies should be managed via Composer
+• Include automated tests (e.g. PHPUnit)
+• The application should not be tightly coupled to a specific storage mechanism
+• You are free to use any storage solution you consider appropriate
+• You should use GitHub or another version control system during development
+Documentation
+Include a brief README that explains:
+• How to run the application
+• How to interact with the API
+• How to execute the command that sends the charge report
+• Any assumptions or trade-offs you made
+Tips
+The scope is intentionally open-ended. Focus on clarity and maintainability rather than completeness. If
+something is unclear, make reasonable assumptions and document them. Treat this as production-quality
+code, within a realistic time investment
