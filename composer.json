@@ -3,7 +3,8 @@
     "description": "A PHP backend connecting mccs with psps",
     "type": "project",
     "require": {
-        "php": ">=8.2"
+        "php": ">=8.2",
+        "ramsey/uuid": "^4.9"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.5"
