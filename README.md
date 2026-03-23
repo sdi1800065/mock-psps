@@ -49,6 +49,12 @@ docker compose ps
 http://localhost:8080
 ```
 
+4. Mailpit UI for sent emails:
+
+```text
+http://localhost:8025
+```
+
 ## Merchant Authentication
 
 Use Bearer token authentication.
@@ -122,15 +128,23 @@ curl -X POST http://localhost:8080/charge \
 
 ## Charge Report Command
 
-The specification asks for a CLI command that collects charges by merchant and date range and sends them by email.
+The project includes a CLI command that collects charges by merchant and date range and sends the generated email through SMTP.
 
-Current status: not implemented yet.
+For local development, Docker Compose starts Mailpit as a mock SMTP server and inbox UI.
 
-Planned command shape:
+Run it from the app container:
 
 ```bash
-php bin/send-charge-report.php --merchant=merchant-1 --from=2026-03-01 --to=2026-03-23
+docker compose exec app php bin/send-charge-report.php --merchant=merchant-1 --from=2026-03-01 --to=2026-03-23
 ```
+
+View delivered emails at:
+
+```text
+http://localhost:8025
+```
+
+If you want to switch back to file-based delivery, set `EMAIL_TRANSPORT=file` in the app environment.
 
 ## Tests
 
@@ -146,6 +160,7 @@ docker compose exec app vendor/bin/phpunit
 
 - Merchant configuration is static and loaded from `config/merchants.php`.
 - PSPs are fake by design and do not call external APIs.
-- Charge IDs use `uniqid`, which is acceptable for this exercise but not ideal for high-scale production systems.
+- Charge IDs use UUIDs for safer uniqueness and better production realism.
 - Single endpoint, minimal routing and validation to keep the implementation focused.
 - MySQL schema is created at runtime in repository constructor for simplicity.
+- Email delivery uses Mailpit locally as a mock SMTP server for development and demos.

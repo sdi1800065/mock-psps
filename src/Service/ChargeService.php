@@ -9,7 +9,8 @@ use MockPsps\Model\Merchant;
 use MockPsps\Model\Charge;
 use Ramsey\Uuid\Uuid;
 
-class ChargeService {
+class ChargeService 
+{
     
     public function __construct(
         private ChargeRepositoryInterface $chargeRepository ,

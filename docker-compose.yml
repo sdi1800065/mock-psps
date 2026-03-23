@@ -12,9 +12,16 @@ services:
       DB_NAME: mockpsps
       DB_USER: mockpsps
       DB_PASS: secret
+      EMAIL_TRANSPORT: smtp
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_FROM_EMAIL: reports@mock-psps.local
+      SMTP_FROM_NAME: Mock PSP Reports
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   db:
     image: mysql:8.0
@@ -32,6 +39,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 
 volumes:
   vendor_data:
