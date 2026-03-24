@@ -82,7 +82,7 @@ For a PayPal merchant, use `"pspName": "fakePaypal"`.
 
 ## API
 
-### Charge a card — `POST /merch`
+### Charge a card — `POST /charge`
 
 Authenticated with the merchant's own API key.
 
@@ -94,7 +94,7 @@ For `fakeStripe`, also include: `cardNumber`, `cvv`, `expiryMonth`, `expiryYear`
 For `fakePaypal`, also include: `email`, `password`
 
 ```bash
-curl -X POST http://localhost:8080/merch \
+curl -X POST http://localhost:8080/charge \
   -H 'Authorization: Bearer my-secret-key-123' \
   -H 'Content-Type: application/json' \
   -d '{
