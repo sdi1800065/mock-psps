@@ -84,9 +84,17 @@ if ($method === 'POST' && $path === '/merch') {
 if ($method === 'POST' && $path === '/merchant/add') {
     $body = json_decode(file_get_contents('php://input'), true) ?? [];
     try {
-        $merchant = $merchantService->create($body);    
+        $result = $merchantService->create($body);
+        $merchant = $result['merchant'];
+        $apiKey = $result['apiKey'];
         http_response_code(201);
-        echo json_encode(['id' => $merchant->id, 'name' => $merchant->name, 'pspName' => $merchant->pspName, 'apiKey' => $merchant->apiKey, 'email' => $merchant->email]);
+        echo json_encode([
+            'id' => $merchant->id, 
+            'name' => $merchant->name, 
+            'pspName' => $merchant->pspName, 
+            'apiKey' => $apiKey,
+            'email' => $merchant->email
+        ]);
     } catch (\InvalidArgumentException $e) {
         http_response_code(422);
         echo json_encode(['error' => $e->getMessage()]);

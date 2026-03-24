@@ -16,7 +16,7 @@ $pdo->exec('
         id VARCHAR(64) PRIMARY KEY,
         name VARCHAR(64) NOT NULL,
         psp_name VARCHAR(64) NOT NULL,
-        api_key VARCHAR(64) NOT NULL,
+        api_key_hash VARCHAR(255) NOT NULL UNIQUE,
         email VARCHAR(128) NOT NULL
     )
 ');

@@ -98,7 +98,7 @@ final class ChargeServiceTest extends TestCase
             id: 'merchant-1',
             name: 'Acme Corp',
             pspName: $pspName,
-            apiKey: 'test-key',
+            apiKeyHash: 'test-key',
             email: 'acme@example.com',
         );
     }

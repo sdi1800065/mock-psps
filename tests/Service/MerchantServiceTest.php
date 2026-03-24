@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MockPsps\Tests\Service;
 
 use MockPsps\Model\Merchant;
+use MockPsps\Model\ApiKeyValidator;
 use MockPsps\Repository\MerchantRepositoryInterface;
 use MockPsps\Service\MerchantService;
 use PHPUnit\Framework\TestCase;
@@ -16,17 +17,23 @@ final class MerchantServiceTest extends TestCase
         $repository = new InMemoryMerchantRepositoryFake();
         $service = new MerchantService($repository);
 
-        $merchant = $service->create([
+        $result = $service->create([
             'name' => 'Amco',
             'pspName' => 'fakeStripe',
-            'apiKey' => 'amco-live-key',
             'email' => 'amco@amco.example',
         ]);
 
+        $merchant = $result['merchant'];
+        $generatedApiKey = $result['apiKey'];
+        
         self::assertSame('Amco', $merchant->name);
         self::assertSame('fakeStripe', $merchant->pspName);
-        self::assertSame('amco-live-key', $merchant->apiKey);
         self::assertNotEmpty($merchant->id);
+       
+        self::assertNotEmpty($generatedApiKey);
+        self::assertGreaterThanOrEqual(32, strlen($generatedApiKey));
+        self::assertTrue(ApiKeyValidator::verify($generatedApiKey, $merchant->apiKeyHash));
+        
         self::assertNotNull($repository->createdMerchant);
         self::assertSame($merchant->id, $repository->createdMerchant->id);
     }
@@ -41,7 +48,6 @@ final class MerchantServiceTest extends TestCase
         $service->create([
             'name' => 'EveryPay',
             'pspName' => 'unknownPsp',
-            'apiKey' => 'everypay-key',
             'email' => 'ops@everypay.example',
         ]);
     }
@@ -77,7 +83,6 @@ final class MerchantServiceTest extends TestCase
         $service->create([
             'name' => 'No Mail',
             'pspName' => 'fakePaypal',
-            'apiKey' => 'no-mail-key',
         ]);
     }
 }

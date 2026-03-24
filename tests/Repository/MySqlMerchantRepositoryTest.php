@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MockPsps\Tests\Repository;
 
 use MockPsps\Model\Merchant;
+use MockPsps\Model\ApiKeyValidator;
 use MockPsps\Repository\MySqlMerchantRepository;
 use PHPUnit\Framework\TestCase;
 
@@ -26,7 +27,7 @@ final class MySqlMerchantRepositoryTest extends TestCase
             id VARCHAR(64) PRIMARY KEY,
             name VARCHAR(64) NOT NULL,
             psp_name VARCHAR(64) NOT NULL,
-            api_key VARCHAR(64) NOT NULL,
+            api_key_hash VARCHAR(255) NOT NULL UNIQUE,
             email VARCHAR(128) NOT NULL
         )');
 
@@ -37,11 +38,12 @@ final class MySqlMerchantRepositoryTest extends TestCase
 
     public function testMerchantFindById(): void
     {
+        $plainApiKey = 'amco-live-key-1234567890123456789012';
         $merchant = new Merchant(
             id: 'amco',
             name: 'Amco',
             pspName: 'fakeStripe',
-            apiKey: 'amco-live-key',
+            apiKeyHash: ApiKeyValidator::hash($plainApiKey),
             email: 'amco@amco.example',
         );
 
@@ -56,17 +58,18 @@ final class MySqlMerchantRepositoryTest extends TestCase
 
     public function testMerchantFindByApiKey(): void
     {
+        $plainApiKey = 'amco-live-key-1234567890123456789012';
         $merchant = new Merchant(
             id: 'amco',
             name: 'Amco',
             pspName: 'fakePaypal',
-            apiKey: 'amco-live-key',
+            apiKeyHash: ApiKeyValidator::hash($plainApiKey),
             email: 'amco@amco.example',
         );
 
         $this->repository->create($merchant);
 
-        $found = $this->repository->findByApiKey('amco-live-key');
+        $found = $this->repository->findByApiKey($plainApiKey);
 
         self::assertNotNull($found);
         self::assertSame('amco', $found->id);
@@ -74,11 +77,12 @@ final class MySqlMerchantRepositoryTest extends TestCase
 
     public function testMerchantRemove(): void
     {
+        $plainApiKey = 'amco-live-key-1234567890123456789012';
         $merchant = new Merchant(
             id: 'amco',
             name: 'Amco',
             pspName: 'fakeStripe',
-            apiKey: 'amco-live-key',
+            apiKeyHash: ApiKeyValidator::hash($plainApiKey),
             email: 'amco@amco.example',
         );
 

@@ -10,7 +10,7 @@ class Merchant
         public readonly string $id,
         public readonly string $name,
         public readonly string $pspName,
-        public readonly string $apiKey,
+        public readonly string $apiKeyHash,
         public readonly string $email,
     ){}
 }

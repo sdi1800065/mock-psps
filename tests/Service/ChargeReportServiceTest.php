@@ -96,7 +96,7 @@ final class ChargeReportServiceTest extends TestCase
             id: 'merchant-1',
             name: 'Acme Corp',
             pspName: 'fakeStripe',
-            apiKey: 'test-key',
+            apiKeyHash: 'test-key',
             email: 'acme@example.com',
         );
     }

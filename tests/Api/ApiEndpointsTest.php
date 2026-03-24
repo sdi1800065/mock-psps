@@ -51,7 +51,7 @@ final class ApiEndpointsTest extends TestCase
             id VARCHAR(64) PRIMARY KEY,
             name VARCHAR(64) NOT NULL,
             psp_name VARCHAR(64) NOT NULL,
-            api_key VARCHAR(64) NOT NULL,
+            api_key_hash VARCHAR(255) NOT NULL UNIQUE,
             email VARCHAR(128) NOT NULL
         )');
 
@@ -78,7 +78,6 @@ final class ApiEndpointsTest extends TestCase
             jsonBody: [
                 'name' => 'amco',
                 'pspName' => 'fakeStripe',
-                'apiKey' => 'amco-key-001',
                 'email' => 'hello@amco.example',
             ],
         );
@@ -87,12 +86,11 @@ final class ApiEndpointsTest extends TestCase
         self::assertArrayHasKey('id', $response['body']);
         self::assertSame('amco', $response['body']['name']);
         self::assertSame('fakeStripe', $response['body']['pspName']);
+        self::assertArrayHasKey('apiKey', $response['body']);
     }
 
     public function testMerchantCanChargeAfterRegistration(): void
     {
-        $merchantApiKey = 'api-key-' . uniqid('', true);
-
         $createMerchantResponse = $this->request(
             method: 'POST',
             path: '/merchant/add',
@@ -100,12 +98,13 @@ final class ApiEndpointsTest extends TestCase
             jsonBody: [
                 'name' => 'amco',
                 'pspName' => 'fakeStripe',
-                'apiKey' => $merchantApiKey,
                 'email' => 'accounts@amco.example',
             ],
         );
 
         self::assertSame(201, $createMerchantResponse['statusCode']);
+        $merchantApiKey = $createMerchantResponse['body']['apiKey'];
+        self::assertNotEmpty($merchantApiKey);
 
         $chargeResponse = $this->request(
             method: 'POST',
@@ -135,7 +134,6 @@ final class ApiEndpointsTest extends TestCase
             jsonBody: [
                 'name' => 'fail',
                 'pspName' => 'fakeStripe',
-                'apiKey' => 'fail-key',
                 'email' => 'fail@example.com',
             ],
         );

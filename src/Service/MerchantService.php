@@ -6,6 +6,7 @@ namespace MockPsps\Service;
 use MockPsps\Repository\MerchantRepositoryInterface;
 use MockPsps\Model\PaymentProvider;
 use MockPsps\Model\Merchant;
+use MockPsps\Model\ApiKeyValidator;
 use Ramsey\Uuid\Uuid;
 
 class MerchantService
@@ -13,8 +14,7 @@ class MerchantService
     public function __construct(
         private MerchantRepositoryInterface $merchantRepository,
     ) {}
-
-    public function create(array $params): Merchant
+    public function create(array $params): array
     {
         if (!isset($params['name']) || !is_string($params['name'])) {
             throw new \InvalidArgumentException('name is required');
@@ -22,25 +22,29 @@ class MerchantService
         if (!isset($params['pspName']) || !is_string($params['pspName'])) {
             throw new \InvalidArgumentException('pspName is required');
         }
-        if (!isset($params['apiKey']) || !is_string($params['apiKey'])) {
-            throw new \InvalidArgumentException('apiKey is required');
-        }
         if (!isset($params['email']) || !is_string($params['email'])) {
             throw new \InvalidArgumentException('email is required');
         }
         if (PaymentProvider::tryFrom($params['pspName']) === null) {
             throw new \InvalidArgumentException('pspName must be either FakeStripe or FakePaypal');
-        }   
+        }
+        
+        $apiKey = ApiKeyValidator::generate();
+        $apiKeyHash = ApiKeyValidator::hash($apiKey);
 
         $merchant = new Merchant(
             id : 'merchant_' . Uuid::uuid7()->toString(),
             name : $params['name'],
             pspName : $params['pspName'],
-            apiKey : $params['apiKey'],
+            apiKeyHash : $apiKeyHash,
             email : $params['email'],
         );
         $this->merchantRepository->create($merchant);
-        return $merchant;        
+        
+        return [
+            'merchant' => $merchant,
+            'apiKey' => $apiKey,
+        ];
     }
     public function remove(array $params): bool
     {
