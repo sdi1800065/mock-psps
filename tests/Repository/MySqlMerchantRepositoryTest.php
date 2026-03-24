@@ -36,6 +36,11 @@ final class MySqlMerchantRepositoryTest extends TestCase
         $this->repository = new MySqlMerchantRepository($this->pdo);
     }
 
+    protected function tearDown(): void
+    {
+        $this->pdo->exec('TRUNCATE TABLE merchants');
+    }
+
     public function testMerchantFindById(): void
     {
         $plainApiKey = 'amco-live-key-1234567890123456789012';

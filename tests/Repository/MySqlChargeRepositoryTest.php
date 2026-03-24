@@ -37,6 +37,11 @@ final class MySqlChargeRepositoryTest extends TestCase
         $this->repository = new MySqlChargeRepository($this->pdo);
     }
 
+    protected function tearDown(): void
+    {
+        $this->pdo->exec('TRUNCATE TABLE charges');
+    }
+
     public function testSaveThenFindById(): void
     {
         $charge = new Charge(

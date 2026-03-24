@@ -69,6 +69,12 @@ final class ApiEndpointsTest extends TestCase
         $this->pdo->exec('TRUNCATE TABLE merchants');
     }
 
+    protected function tearDown(): void
+    {
+        $this->pdo->exec('TRUNCATE TABLE charges');
+        $this->pdo->exec('TRUNCATE TABLE merchants');
+    }
+
     public function testAdminCanRegisterMerchant(): void
     {
         $response = $this->request(
