@@ -65,7 +65,7 @@ else
 
 
 // Route
-if ($method === 'POST' && $path === '/merch') {
+if ($method === 'POST' && $path === '/charge') {
     $body = json_decode(file_get_contents('php://input'), true) ?? [];
     try {
         $charge = $chargeService->charge($merchant, $body);

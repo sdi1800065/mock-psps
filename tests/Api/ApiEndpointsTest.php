@@ -114,7 +114,7 @@ final class ApiEndpointsTest extends TestCase
 
         $chargeResponse = $this->request(
             method: 'POST',
-            path: '/merch',
+            path: '/charge',
             authHeader: 'Bearer ' . $merchantApiKey,
             jsonBody: [
                 'amount' => 1500,
