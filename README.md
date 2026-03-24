@@ -162,11 +162,39 @@ To switch to file-based delivery instead of SMTP, set `EMAIL_TRANSPORT=file` in 
 
 ## Tests
 
+Run all tests:
+
 ```bash
 docker compose run --rm app vendor/bin/phpunit tests/
 ```
 
-Currently covers `ChargeService` and `ChargeReportService` with in-memory fakes (no database required).
+Run tests from a specific test suite:
+
+```bash
+# API endpoint tests
+docker compose run --rm app vendor/bin/phpunit tests/Api/
+
+# Service tests
+docker compose run --rm app vendor/bin/phpunit tests/Service/
+
+# Repository tests
+docker compose run --rm app vendor/bin/phpunit tests/Repository/
+```
+
+Run a specific test file:
+
+```bash
+docker compose run --rm app vendor/bin/phpunit tests/Service/ChargeServiceTest.php
+```
+
+**Test coverage:**
+- `ChargeService` — charge processing and merchant handling
+- `ChargeReportService` — report generation
+- `MerchantService` — merchant CRUD operations
+- `MySqlChargeRepository` — charge persistence
+- `MySqlMerchantRepository` — merchant persistence
+- `ApiEndpoints` — HTTP endpoint integration
+
 
 ## Notes
 
