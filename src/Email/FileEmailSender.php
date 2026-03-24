@@ -10,7 +10,7 @@ class FileEmailSender implements EmailSenderInterface
 
     public function send(string $to, string $subject, string $body): string
     {
-        if (!is_dir($this->outboxDirectory) && !mkdir($concurrentDirectory = $this->outboxDirectory, 0777, true) && !is_dir($concurrentDirectory))
+        if (!is_dir($this->outboxDirectory) && !mkdir($this->outboxDirectory, 0777, true) && !is_dir($this->outboxDirectory))
         {
             throw new \RuntimeException(sprintf('Failed to create outbox directory: %s', $this->outboxDirectory));
         }

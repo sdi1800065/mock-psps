@@ -7,6 +7,7 @@ use MockPsps\Repository\ChargeRepositoryInterface;
 use MockPsps\Psp\PspInterface;
 use MockPsps\Model\Merchant;
 use MockPsps\Model\Charge;
+use Ramsey\Uuid\Uuid;
 
 class ChargeService {
     
@@ -28,7 +29,7 @@ class ChargeService {
         if(empty($merchantPsp)) throw new \RuntimeException("PSP not configured");
         $chargeResult = $merchantPsp->charge($params);
         $charge = new Charge(
-            id : uniqid('charge_'),
+            id : 'charge_' . Uuid::uuid7()->toString(),
             merchantId : $merchant->id,
             amount : $params['amount'],
             currency : $params['currency'],

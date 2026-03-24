@@ -1,6 +1,6 @@
 {
     "name": "mock-psps/payment-service",
-    "description": "A PHP backend connecting mccs with psps",
+    "description": "A PHP service connecting merchants with payment service providers",
     "type": "project",
     "require": {
         "php": ">=8.2",

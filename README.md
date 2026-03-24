@@ -210,5 +210,17 @@ docker compose run --rm app vendor/bin/phpunit tests/Service/ChargeServiceTest.p
 
 - PSPs are fake and never call external APIs
 - The admin token should be changed from the default before any real deployment — generate one with `php -r "echo bin2hex(random_bytes(32));"` and set it in your environment
-- `hash_equals()` is used for token comparison to prevent timing attacks
+- `hash_equals()` is used for admin token comparison to prevent timing attacks
 - Charge IDs use UUID v7 for time-ordered uniqueness
+
+## Assumptions and trade-offs
+
+- Mock PSPs always return success
+- PSPs accept any card number / email without validation. 
+- `findByApiKey()` is not optimised because it searches bycrypt hashes. Indexing could be better for searching. For production bcrypt should only be used for auth.
+- No rate limiting.
+- No idempotency on `/charge`. We assume every request is a new transaction.
+- Amount is stored in cents (integer) to avoid floating-point precision issues
+- No foreign key constraint between charges and merchants — keeps the schema simple and avoids cascade-delete complexity
+- The admin token is a single shared secret via env var, not a full user/role system. Good enough for this scope
+- Email delivery uses Mailpit locally (SMTP sink). Swapping to a real provider only requires changing env vars
