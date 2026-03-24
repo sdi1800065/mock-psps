@@ -73,10 +73,10 @@ if ($method === 'POST' && $path === '/charge') {
         echo json_encode(['id' => $charge->id, 'status' => $charge->status, 'transactionId' => $charge->transactionId]);
     } catch (\InvalidArgumentException $e) {
         http_response_code(422);
-        echo json_encode(['error' => $e->getMessage()]);
+        echo json_encode(['error' => 'Failed to process charge']);
     } catch (\RuntimeException $e) {
         http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        echo json_encode(['error' => 'Internal server error']);
     }
     exit;
 }
@@ -97,10 +97,10 @@ if ($method === 'POST' && $path === '/merchant/add') {
         ]);
     } catch (\InvalidArgumentException $e) {
         http_response_code(422);
-        echo json_encode(['error' => $e->getMessage()]);
+        echo json_encode(['error' => 'Failed to create merchant']);
     } catch (\RuntimeException $e) {
         http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        echo json_encode(['error' => 'Internal server error']);
     }
     exit;
 }
@@ -113,10 +113,10 @@ if ($method === 'POST' && $path === '/merchant/remove') {
         echo json_encode(['success' => $ec]);
     } catch (\InvalidArgumentException $e) {
         http_response_code(422);
-        echo json_encode(['error' => $e->getMessage()]);
+        echo json_encode(['error' => 'Failed to remove merchant']);
     } catch (\RuntimeException $e) {
         http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        echo json_encode(['error' => 'Internal server error']);
     }
     exit;
 }
