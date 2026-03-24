@@ -17,6 +17,7 @@ services:
       SMTP_PORT: 1025
       SMTP_FROM_EMAIL: reports@mock-psps.local
       SMTP_FROM_NAME: Mock PSP Reports
+      ADMIN_TOKEN: changeme-use-a-real-secret-in-production
     depends_on:
       db:
         condition: service_healthy

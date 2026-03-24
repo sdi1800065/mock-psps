@@ -7,7 +7,6 @@ namespace MockPsps\Tests\Service;
 use MockPsps\Email\EmailSenderInterface;
 use MockPsps\Model\Charge;
 use MockPsps\Model\Merchant;
-use MockPsps\Model\PspName;
 use MockPsps\Repository\ChargeRepositoryInterface;
 use MockPsps\Service\ChargeReportService;
 use PHPUnit\Framework\TestCase;
@@ -96,8 +95,7 @@ final class ChargeReportServiceTest extends TestCase
         return new Merchant(
             id: 'merchant-1',
             name: 'Acme Corp',
-            pspName: PspName::FakeStripe,
-            pspConfig: [],
+            pspName: 'fakeStripe',
             apiKey: 'test-key',
             email: 'acme@example.com',
         );

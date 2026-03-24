@@ -1,166 +1,176 @@
 # Mock PSPs Payment Service
 
-Small PHP service for charging cards through mock payment service providers (PSPs), authenticated per merchant.
+A small PHP service that simulates charging cards through mock payment providers (PSPs). Merchants are stored in MySQL and authenticate with Bearer tokens. Designed for local development and demos.
 
-## What This Project Does
+## What it does
 
-- Exposes an HTTP API to create a charge.
-- Authenticates every request using a merchant API key.
-- Routes each merchant to a configured PSP (`fakeStripe` or `fakePaypal`).
-- Persists charge records in MySQL.
+- Merchants are created via an admin API and stored in MySQL
+- Each merchant is tied to a PSP (`fakeStripe` or `fakePaypal`)
+- Charge requests are authenticated per merchant using their API key
+- Charges are persisted in MySQL
+- A CLI tool sends email charge reports per merchant and date range
 
-## Tech Stack
+## Tech stack
 
 - PHP 8.2+
-- Apache (PHP image)
+- Apache
 - MySQL 8
 - Docker + Docker Compose
-- Composer
+- PHPUnit
 
-## Project Structure
+## Project structure
 
-- `public/index.php`: HTTP entrypoint and routing.
-- `src/Service/ChargeService.php`: charge orchestration.
-- `src/Psp/*`: fake PSP implementations.
-- `src/Repository/*`: storage abstraction and MySQL implementation.
-- `config/merchants.php`: in-memory merchant configuration.
+```
+public/index.php        HTTP entrypoint and routing
+src/Service/            Business logic (ChargeService, MerchantService, ChargeReportService)
+src/Psp/                Fake PSP implementations
+src/Repository/         Storage interfaces and MySQL implementations
+src/Model/              Domain models (Merchant, Charge, PaymentProvider)
+bin/create-db.php       Creates database tables (run once on setup)
+bin/send-charge-report.php  CLI tool for generating and emailing reports
+tests/                  PHPUnit unit tests
+```
 
-## Prerequisites
+## Getting started
 
-- Docker Desktop (or Docker Engine + Compose plugin)
-
-## Run The Application
-
-1. Build and start containers:
+### 1. Start containers
 
 ```bash
 docker compose up -d --build
 ```
 
-2. Check services:
+### 2. Create database tables
+
+This only needs to be run once (or after a volume wipe):
 
 ```bash
-docker compose ps
+docker compose run --rm app php bin/create-db.php
 ```
 
-3. API base URL:
-
-```text
-http://localhost:8080
+Expected output:
+```
+Database tables created successfully.
 ```
 
-4. Mailpit UI for sent emails:
+### 3. Create your first merchant
 
-```text
-http://localhost:8025
+The admin token is set via `ADMIN_TOKEN` in `docker-compose.yml`.
+
+```bash
+curl -X POST http://localhost:8080/merchant/add \
+  -H 'Authorization: Bearer changeme-use-a-real-secret-in-production' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "name": "Acme Corp",
+    "pspName": "fakeStripe",
+    "apiKey": "my-secret-key-123",
+    "email": "acme@example.com"
+  }'
 ```
 
-## Merchant Authentication
+Response:
+```json
+{
+  "id": "merchant_019d202e-...",
+  "name": "Acme Corp",
+  "pspName": "fakeStripe",
+  "apiKey": "my-secret-key-123",
+  "email": "acme@example.com"
+}
+```
 
-Use Bearer token authentication.
-
-Configured demo merchants:
-
-- `merchant-1` (PSP: `fakeStripe`) -> API key: `test-key-stripe-123`
-- `merchant-2` (PSP: `fakePaypal`) -> API key: `test-key-paypal-456`
+For a PayPal merchant, use `"pspName": "fakePaypal"`.
 
 ## API
 
-### POST /charge
+### Charge a card — `POST /merch`
 
-Creates a charge for the authenticated merchant.
+Authenticated with the merchant's own API key.
 
-Common required fields:
+Required fields for all PSPs:
+- `amount` — integer, in cents
+- `currency` — e.g. `EUR`
 
-- `amount` (integer, cents)
-- `currency` (string, example `EUR`)
-
-PSP-specific required fields:
-
-- For `fakeStripe`: `cardNumber`, `cvv`, `expiryMonth`, `expiryYear`
-- For `fakePaypal`: `email`, `password`
-
-### Example: fakeStripe merchant
+For `fakeStripe`, also include: `cardNumber`, `cvv`, `expiryMonth`, `expiryYear`  
+For `fakePaypal`, also include: `email`, `password`
 
 ```bash
-curl -X POST http://localhost:8080/charge \
-	-H 'Authorization: Bearer test-key-stripe-123' \
-	-H 'Content-Type: application/json' \
-	-d '{
-		"amount": 1000,
-		"currency": "EUR",
-		"cardNumber": "4242424242424242",
-		"cvv": "123",
-		"expiryMonth": "12",
-		"expiryYear": "2030"
-	}'
+curl -X POST http://localhost:8080/merch \
+  -H 'Authorization: Bearer my-secret-key-123' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "amount": 1500,
+    "currency": "EUR",
+    "cardNumber": "4242424242424242",
+    "cvv": "123",
+    "expiryMonth": "12",
+    "expiryYear": "2030"
+  }'
 ```
 
-### Example: fakePaypal merchant
-
-```bash
-curl -X POST http://localhost:8080/charge \
-	-H 'Authorization: Bearer test-key-paypal-456' \
-	-H 'Content-Type: application/json' \
-	-d '{
-		"amount": 2500,
-		"currency": "EUR",
-		"email": "buyer@example.com",
-		"password": "secret"
-	}'
-```
-
-### Response (success)
-
+Response:
 ```json
 {
-	"id": "charge_...",
-	"status": "success",
-	"transactionId": "stripe_..."
+  "id": "charge_...",
+  "status": "success",
+  "transactionId": "stripe_..."
 }
+```
+
+### Create a merchant — `POST /merchant/add`
+
+Requires the admin Bearer token.
+
+| Field | Type | Notes |
+|---|---|---|
+| `name` | string | Display name |
+| `pspName` | string | `fakeStripe` or `fakePaypal` |
+| `apiKey` | string | The key this merchant will use to authenticate |
+| `email` | string | Used for charge reports |
+
+### Remove a merchant — `POST /merchant/remove`
+
+Requires the admin Bearer token.
+
+```bash
+curl -X POST http://localhost:8080/merchant/remove \
+  -H 'Authorization: Bearer changeme-use-a-real-secret-in-production' \
+  -H 'Content-Type: application/json' \
+  -d '{"id": "merchant_019d202e-..."}'
 ```
 
 ### Error responses
 
-- `401 Unauthorized`: missing or invalid Bearer token
-- `422 Unprocessable Entity`: invalid or missing request fields
-- `500 Internal Server Error`: PSP configuration/runtime issue
+- `401` — missing or invalid Bearer token
+- `422` — invalid or missing fields
+- `500` — PSP configuration or runtime issue
 
-## Charge Report Command
+## Charge report CLI
 
-The project includes a CLI command that collects charges by merchant and date range and sends the generated email through SMTP.
-
-For local development, Docker Compose starts Mailpit as a mock SMTP server and inbox UI.
-
-Run it from the app container:
+Sends a charge summary email for a given merchant and date range. Mailpit runs locally as a mock inbox.
 
 ```bash
-docker compose exec app php bin/send-charge-report.php --merchant=merchant-1 --from=2026-03-01 --to=2026-03-23
+docker compose exec app php bin/send-charge-report.php \
+  --merchant=merchant_019d202e-... \
+  --from=2026-03-01 \
+  --to=2026-03-24
 ```
 
-View delivered emails at:
+View delivered emails at `http://localhost:8025`.
 
-```text
-http://localhost:8025
-```
-
-If you want to switch back to file-based delivery, set `EMAIL_TRANSPORT=file` in the app environment.
+To switch to file-based delivery instead of SMTP, set `EMAIL_TRANSPORT=file` in the app environment.
 
 ## Tests
 
-PHPUnit is configured in `composer.json`, but test cases are still pending implementation.
-
-Once tests are added, run them with:
-
 ```bash
-docker compose exec app vendor/bin/phpunit
+docker compose run --rm app vendor/bin/phpunit tests/
 ```
 
-## Assumptions And Trade-offs
+Currently covers `ChargeService` and `ChargeReportService` with in-memory fakes (no database required).
 
-- Merchant configuration is static and loaded from `config/merchants.php`.
-- PSPs are fake by design and do not call external APIs.
-- Charge IDs use UUIDs for safer uniqueness and better production realism.
-- Single endpoint, minimal routing and validation to keep the implementation focused.
-- MySQL schema is created at runtime in repository constructor for simplicity.
-- Email delivery uses Mailpit locally as a mock SMTP server for development and demos.
+## Notes
+
+- PSPs are fake and never call external APIs
+- The admin token should be changed from the default before any real deployment — generate one with `php -r "echo bin2hex(random_bytes(32));"` and set it in your environment
+- `hash_equals()` is used for token comparison to prevent timing attacks
+- Charge IDs use UUID v7 for time-ordered uniqueness

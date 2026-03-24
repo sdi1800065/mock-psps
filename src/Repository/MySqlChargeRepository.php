@@ -8,20 +8,7 @@ use MockPsps\Model\Charge;
 
 class MySqlChargeRepository implements ChargeRepositoryInterface
 {
-    public function __construct(private \PDO $pdo)
-    {
-        $this->pdo->exec('
-            CREATE TABLE IF NOT EXISTS charges (
-                id VARCHAR(64) PRIMARY KEY,
-                merchant_id VARCHAR(64) NOT NULL,
-                amount INT NOT NULL,
-                currency VARCHAR(8) NOT NULL,
-                status VARCHAR(16) NOT NULL,
-                transaction_id VARCHAR(128) NOT NULL,
-                created_at VARCHAR(32) NOT NULL
-            )
-        ');
-    }
+    public function __construct(private \PDO $pdo){}
 
     public function save(Charge $charge): void
     {

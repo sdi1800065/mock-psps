@@ -7,10 +7,8 @@ use MockPsps\Repository\ChargeRepositoryInterface;
 use MockPsps\Psp\PspInterface;
 use MockPsps\Model\Merchant;
 use MockPsps\Model\Charge;
-use Ramsey\Uuid\Uuid;
 
-class ChargeService 
-{
+class ChargeService {
     
     public function __construct(
         private ChargeRepositoryInterface $chargeRepository ,
@@ -26,11 +24,11 @@ class ChargeService
             throw new \InvalidArgumentException('currency is required');
         }
 
-        $merchantPsp = $this->psps[$merchant->pspName->value] ?? null;
+        $merchantPsp = $this->psps[$merchant->pspName] ?? null;
         if(empty($merchantPsp)) throw new \RuntimeException("PSP not configured");
         $chargeResult = $merchantPsp->charge($params);
         $charge = new Charge(
-            id : 'charge_' . Uuid::uuid7()->toString(),
+            id : uniqid('charge_'),
             merchantId : $merchant->id,
             amount : $params['amount'],
             currency : $params['currency'],

@@ -4,11 +4,18 @@ declare(strict_types=1);
 
 use MockPsps\Email\FileEmailSender;
 use MockPsps\Email\SmtpEmailSender;
-use MockPsps\Repository\InMemoryMerchantRepository;
+use MockPsps\Repository\MySqlMerchantRepository;
 use MockPsps\Repository\MySqlChargeRepository;
 use MockPsps\Service\ChargeReportService;
 
 require_once __DIR__ . '/../vendor/autoload.php';
+
+$pdo = new PDO(
+    'mysql:host=' . getenv('DB_HOST') . ';dbname=' . getenv('DB_NAME') . ';charset=utf8mb4',
+    getenv('DB_USER'),
+    getenv('DB_PASS'),
+    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+);
 
 $options = getopt('', ['merchant:', 'from:', 'to:']);
 
@@ -29,8 +36,7 @@ catch (Exception $exception)
     exit(1);
 }
 
-$merchants = require __DIR__ . '/../config/merchants.php';
-$merchantRepository = new InMemoryMerchantRepository($merchants);
+$merchantRepository = new MySqlMerchantRepository($pdo);
 $merchant = $merchantRepository->findById($options['merchant']);
 
 if ($merchant === null) 
@@ -38,13 +44,6 @@ if ($merchant === null)
     fwrite(STDERR, sprintf("Merchant not found: %s\n", $options['merchant']));
     exit(1);
 }
-
-$pdo = new PDO(
-    'mysql:host=' . getenv('DB_HOST') . ';dbname=' . getenv('DB_NAME') . ';charset=utf8mb4',
-    getenv('DB_USER'),
-    getenv('DB_PASS'),
-    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-);
 
 $chargeRepository = new MySqlChargeRepository($pdo);
 $emailTransport = getenv('EMAIL_TRANSPORT') ?: 'smtp';

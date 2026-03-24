@@ -6,7 +6,6 @@ namespace MockPsps\Tests\Service;
 
 use MockPsps\Model\Charge;
 use MockPsps\Model\Merchant;
-use MockPsps\Model\PspName;
 use MockPsps\Psp\FakeStripe;
 use MockPsps\Repository\ChargeRepositoryInterface;
 use MockPsps\Service\ChargeService;
@@ -21,7 +20,7 @@ final class ChargeServiceTest extends TestCase
             'fakeStripe' => new FakeStripe(),
         ]);
 
-        $merchant = $this->createMerchant(PspName::FakeStripe);
+        $merchant = $this->createMerchant('fakeStripe');
 
         $result = $service->charge($merchant, [
             'amount' => 1000,
@@ -48,7 +47,7 @@ final class ChargeServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('amount must be a positive integer (cents)');
 
-        $service->charge($this->createMerchant(PspName::FakeStripe), [
+        $service->charge($this->createMerchant('fakeStripe'), [
             'amount' => 0,
             'currency' => 'EUR',
             'cardNumber' => '4242424242424242',
@@ -67,7 +66,7 @@ final class ChargeServiceTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('currency is required');
 
-        $service->charge($this->createMerchant(PspName::FakeStripe), [
+        $service->charge($this->createMerchant('fakeStripe'), [
             'amount' => 1000,
             'cardNumber' => '4242424242424242',
             'cvv' => '123',
@@ -85,7 +84,7 @@ final class ChargeServiceTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('PSP not configured');
 
-        $service->charge($this->createMerchant(PspName::FakePaypal), [
+        $service->charge($this->createMerchant('fakePaypal'), [
             'amount' => 1000,
             'currency' => 'EUR',
             'email' => 'buyer@example.com',
@@ -93,13 +92,12 @@ final class ChargeServiceTest extends TestCase
         ]);
     }
 
-    private function createMerchant(PspName $pspName): Merchant
+    private function createMerchant(string $pspName): Merchant
     {
         return new Merchant(
             id: 'merchant-1',
             name: 'Acme Corp',
             pspName: $pspName,
-            pspConfig: [],
             apiKey: 'test-key',
             email: 'acme@example.com',
         );
